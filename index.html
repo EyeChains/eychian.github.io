@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mua Token EYC</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 100px;
+      background-color: #f4f4f4;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px;
+    }
+    #container {
+      background: white;
+      display: inline-block;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h1>Mua Token EYC</h1>
+    <p>Kết nối ví và gửi BNB để nhận EYC tự động</p>
+
+    <button onclick="connectWallet()">🔗 Kết nối ví Metamask</button><br>
+    <input type="number" id="bnbAmount" placeholder="Số BNB muốn gửi" step="0.001" /><br>
+    <button onclick="buyToken()">🪙 Mua Token EYC</button>
+
+    <p id="status"></p>
+  </div>
+
+  <script>
+    const contractAddress = "0xe832d3141983AC5A768Bcb4FB692bd055E2afcc4";
+
+    let provider;
+    let signer;
+
+    async function connectWallet() {
+      if (window.ethereum) {
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+        document.getElementById("status").innerText = "✅ Ví đã kết nối";
+      } else {
+        alert("Vui lòng cài đặt ví Metamask để sử dụng.");
+      }
+    }
+
+    async function buyToken() {
+      if (!signer) {
+        alert("Vui lòng kết nối ví trước.");
+        return;
+      }
+
+      const bnbAmount = document.getElementById("bnbAmount").value;
+      if (!bnbAmount || bnbAmount <= 0) {
+        alert("Vui lòng nhập số BNB hợp lệ.");
+        return;
+      }
+
+      try {
+        const tx = await signer.sendTransaction({
+          to: contractAddress,
+          value: ethers.utils.parseEther(bnbAmount)
+        });
+        document.getElementById("status").innerText = "⏳ Đang xử lý giao dịch...";
+        await tx.wait();
+        document.getElementById("status").innerText = "✅ Mua thành công! Token EYC sẽ tự động gửi về ví của bạn.";
+      } catch (error) {
+        console.error(error);
+        document.getElementById("status").innerText = "❌ Giao dịch thất bại.";
+      }
+    }
+  </script>
+</body>
+</html>
+=
